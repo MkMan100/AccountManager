@@ -2,6 +2,22 @@ balance = 0.0
 warehouse_Item = {}
 history = []
 
+with open("dbfile.txt", "r") as file:
+    lines = file.readlines()
+
+if len(lines) > 0:
+    for line in lines:
+        line = line.strip()
+        if line.startswith("BAL:"):
+            balance = float(line.replace("BAL:", ""))
+        elif line.startswith("INV:"):
+            # Formato INV:nome,prezzo,quantità
+            parts = line.replace("INV:", "").split(",")
+            # parts[0]=nome, parts[1]=prezzo, parts[2]=quantità
+            warehouse_Item[parts[0]] = [float(parts[1]), int(parts[2])]
+        elif line.startswith("HIS:"):
+            history.append(line.replace("HIS:", ""))
+
 command = ["balance", "sale", "purchase", "account", "list", "warehouse", "review", "end"]
 
 while True:
@@ -10,6 +26,13 @@ while True:
     insert_command = input("Insert Command: ").strip().lower()
 
     if insert_command == "end":
+        with open("dbfile.txt", "w") as file:
+            file.write(f"BAL:{balance}\n")
+            for product in warehouse_Item:
+                p_info = warehouse_Item[product]
+                file.write(f"INV:{product},{p_info[0]},{p_info[1]}\n")
+            for event in history:
+                file.write(f"HIS:{event}\n")
         break
 
     elif insert_command == "balance":
